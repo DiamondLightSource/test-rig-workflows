@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: visr
+  annotations:
+    workflows.argoproj.io/title: visr
+    workflows.argoproj.io/description: |
+      Data processing for the Visible Light Spectroscopy beamline (ViSR).
+spec:
+  entrypoint: visr
+  arguments:
+    parameters:
+      - name: visitdir
+        valueFrom:
+          configMapKeyRef:
+            name: sessionspaces
+            key: data_directory
+  templates:
+    - name: visr
+      inputs:
+        parameters:
+          - name: inputFilePath
+            value: ""
+      script:
+        image: alpine:3.22
+        command: [sh]
+        source: |
+          echo Hello Visr!
+          echo Visit directory: {{`{{workflow.parameters.visitdir}}`}}
+          echo Input file path: {{`{{inputs.parameters.inputFilePath}}`}}
+          ls {{`{{inputs.parameters.inputFilePath}}`}}
+        volumeMounts:
+          - name: session
+            mountPath: "{{`{{workflow.parameters.visitdir}}`}}"
+      volumes:
+        - name: session
+          hostPath:
+            path: "{{`{{workflow.parameters.visitdir}}`}}`}}"
+            type: Directory
