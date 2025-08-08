@@ -35,5 +35,5 @@ spec:
       volumes:
         - name: session
           hostPath:
-            path: "{{`{{workflow.parameters.visitdir}}`}}`}}"
+            path: "{{`{{workflow.parameters.visitdir}}`}}"
             type: Directory
