@@ -15,25 +15,74 @@ spec:
           configMapKeyRef:
             name: sessionspaces
             key: data_directory
+      - name: inpath
+        value: ""
+  volumes:
+    - name: session
+      hostPath:
+        path: "{{`{{ workflow.parameters.visitdir }}`}}"
+        type: Directory
+  volumeClaimTemplates:
+    - metadata:
+        name: tmp
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: local-path
+    - metadata:
+        name: tmpdir
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: local-path
+
   templates:
-    - name: visr
-      inputs:
-        parameters:
-          - name: inputFilePath
-            value: ""
+    - name: mount-files
       script:
-        image: alpine:3.22
-        command: [sh]
+        image: docker.io/library/python:bookworm
+        command: [bash]
         source: |
-          echo Hello Visr!
-          echo Visit directory: {{`{{workflow.parameters.visitdir}}`}}
-          echo Input file path: {{`{{inputs.parameters.inputFilePath}}`}}
-          ls {{`{{inputs.parameters.inputFilePath}}`}}
+          echo '{{ .Files.Get "notebooks/visr-maths-03.ipynb" | b64enc }}' | base64 -d > /tmp/notebook.ipynb
+          echo '{{ .Files.Get "notebooks/requirements.txt" | b64enc }}' | base64 -d > /tmp/requirements.txt
         volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+    - name: convert-notebook
+      script:
+        image: docker.io/library/python:bookworm
+        command: [bash]
+        source: |
+          # install dependencies
+          python -m venv /tmp/venv
+          /tmp/venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt
+          /tmp/venv/bin/python -m ipykernel install --prefix=/tmp/venv --name=venv
+          # create matplotlib config dir
+          mkdir -p /tmp/mpl
+          export MPLCONFIGDIR=/tmp/mpl
+          # run notebook
+          /tmp/venv/bin/python -m papermill /tmp/notebook.ipynb /tmp/notebook-parametrized.ipynb \
+            -p inpath '{{`{{workflow.parameters.inpath}}`}}'
+          /tmp/venv/bin/python -m jupyter nbconvert --execute --allow-errors --to html --output notebook --output-dir /tmp /tmp/notebook-parametrized.ipynb
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           - name: session
-            mountPath: "{{`{{workflow.parameters.visitdir}}`}}"
-      volumes:
-        - name: session
-          hostPath:
-            path: "{{`{{workflow.parameters.visitdir}}`}}"
-            type: Directory
+            mountPath: "{{`{{ workflow.parameters.visitdir }}`}}"
+      outputs:
+        artifacts:
+          - name: notebook
+            path: /tmp/notebook.html
+            archive:
+              none: {}
+    - name: visr
+      dag:
+        tasks:
+          - name: mount-files
+            template: mount-files
+          - name: convert-notebook
+            template: convert-notebook
+            dependencies: [mount-files]
