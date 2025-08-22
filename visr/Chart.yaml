@@ -2,4 +2,4 @@ apiVersion: v2
 name: visr
 description: Data processing for the Visible Light Spectroscopy beamline (ViSR).
 type: application
-version: 0.0.1
+version: 0.0.2
