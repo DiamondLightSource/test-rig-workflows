@@ -30,7 +30,7 @@ spec:
         resources:
           requests:
             storage: 1Gi
-        storageClassName: local-path
+        storageClassName: netapp
     - metadata:
         name: tmpdir
       spec:
@@ -38,7 +38,7 @@ spec:
         resources:
           requests:
             storage: 1Gi
-        storageClassName: local-path
+        storageClassName: netapp
 
   templates:
     - name: mount-files
