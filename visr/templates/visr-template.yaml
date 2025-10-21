@@ -43,7 +43,7 @@ spec:
   templates:
     - name: mount-files
       script:
-        image: docker.io/library/python:bookworm
+        image: docker.io/library/python:3.13-bookworm
         command: [bash]
         source: |
           echo '{{ .Files.Get "notebooks/visr-maths-03.ipynb" | b64enc }}' | base64 -d > /tmp/notebook.ipynb
@@ -53,7 +53,7 @@ spec:
             mountPath: /tmp
     - name: convert-notebook
       script:
-        image: docker.io/library/python:bookworm
+        image: docker.io/library/python:3.13-bookworm
         command: [bash]
         source: |
           # install dependencies
