@@ -25,17 +25,17 @@ spec:
   templates:
     - name: visr-reconstruction
       container:
-      image: ghcr.io/diamondlightsource/visr-reconstruction:latest
-      command: [visr-reconstruction]
-      args:
-        - "--output"
-        - "/tmp/visr-reconstructed-image.png"
-        - "{{workflow.parameters.input-file-path}}"
-      volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-        - name: session
-          mountPath: "{{`{{ workflow.parameters.visitdir }}`}}"
+        image: ghcr.io/diamondlightsource/visr-reconstruction:latest
+        command: [visr-reconstruction]
+        args:
+          - "--output"
+          - "/tmp/visr-reconstructed-image.png"
+          - "{{workflow.parameters.input-file-path}}"
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+          - name: session
+            mountPath: "{{`{{ workflow.parameters.visitdir }}`}}"
       outputs:
         artifacts:
           - name: visr-reconstructed-image
