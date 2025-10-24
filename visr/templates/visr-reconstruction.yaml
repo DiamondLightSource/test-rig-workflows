@@ -16,7 +16,7 @@ spec:
             name: sessionspaces
             key: data_directory
       - name: input-file-path
-        value: ""
+        value: "/dls/b01-1/data/2025/cm40661-6/b01-1-361.nxs"
   volumes:
     - name: session
       hostPath:
@@ -30,10 +30,8 @@ spec:
         args:
           - "--output"
           - "/tmp/visr-reconstructed-image.png"
-          - "{{workflow.parameters.input-file-path}}"
+          - "{{`{{workflow.parameters.input-file-path}}`}}"
         volumeMounts:
-          - name: tmp
-            mountPath: /tmp
           - name: session
             mountPath: "{{`{{ workflow.parameters.visitdir }}`}}"
       outputs:
