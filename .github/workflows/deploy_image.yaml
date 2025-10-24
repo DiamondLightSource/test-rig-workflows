@@ -1,11 +1,13 @@
 # adapted from GitHub documentation
 name: Create and publish a Docker image
 
-# deploy when pushing tags started with 'v'
+# # deploy when pushing tags started with 'v'
+# on:
+#   push:
+#     tags:
+#       - 'v*'
 on:
-  push:
-    tags:
-      - 'v*'
+  push
 
 env:
   REGISTRY: ghcr.io
