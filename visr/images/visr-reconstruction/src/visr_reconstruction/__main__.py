@@ -6,9 +6,9 @@ from typing import Optional
 import fsspec
 
 
-def _main(args: Optional[list[str]] = None):
+def _main(args: Optional[list[str]] = None) -> None:
     parser = ArgumentParser()
-    parser.add_argument("--output-file", "-o", type=str, default="")
+    parser.add_argument("--output-file", "-o", type=str, default="visr-reconstruction.png")
     parser.add_argument("input-file", "-o", type=str, default="")
     parsed_args = parser.parse_args(args)
     input_file_path = parsed_args.input_file
