@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: visr-reconstruction
+  annotations:
+    workflows.argoproj.io/title: visr-reconstruction
+    workflows.argoproj.io/description: |
+      Image Reconstruction for the Visible Light Spectroscopy beamline (ViSR).
+spec:
+  entrypoint: visr-reconstruction
+  arguments:
+    parameters:
+      - name: visitdir
+        valueFrom:
+          configMapKeyRef:
+            name: sessionspaces
+            key: data_directory
+      - name: input-file-path
+        value: "/dls/b01-1/data/2025/cm40661-6/b01-1-361.nxs"
+  volumes:
+    - name: session
+      hostPath:
+        path: "{{`{{ workflow.parameters.visitdir }}`}}"
+        type: Directory
+    - name: temp-directory
+      emptyDir: {}
+  templates:
+    - name: visr-reconstruction
+      container:
+        image: ghcr.io/diamondlightsource/visr-reconstruction:latest
+        command: [visr-reconstruction]
+        args:
+          - "--output"
+          - "/tmp/visr-reconstructed-image.png"
+          - "{{`{{workflow.parameters.input-file-path}}`}}"
+        volumeMounts:
+          - name: session
+            mountPath: "{{`{{ workflow.parameters.visitdir }}`}}"
+          - name: temp-directory
+            mountPath: /tmp
+      outputs:
+        artifacts:
+          - name: visr-reconstructed-image
+            path: /tmp/visr-reconstructed-image.png
+            archive:
+              none: {}
