@@ -2,10 +2,13 @@ apiVersion: argoproj.io/v1alpha1
 kind: ClusterWorkflowTemplate
 metadata:
   name: visr-reconstruction
+  labels:
+    workflows.diamond.ac.uk/science-group-examples: "true"
   annotations:
     workflows.argoproj.io/title: visr-reconstruction
     workflows.argoproj.io/description: |
       Image Reconstruction for the Visible Light Spectroscopy beamline (ViSR).
+    workflows.diamond.ac.uk/repository: "https://github.com/DiamondLightSource/test-rig-workflows"
 spec:
   entrypoint: visr-reconstruction
   arguments:
