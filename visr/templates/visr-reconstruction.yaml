@@ -13,17 +13,14 @@ spec:
   entrypoint: visr-reconstruction
   arguments:
     parameters:
-      - name: visitdir
-        valueFrom:
-          configMapKeyRef:
-            name: sessionspaces
-            key: data_directory
-      - name: input-file-path
-        value: "/dls/b01-1/data/2025/cm40661-6/b01-1-361.nxs"
+      - name: scan_file
+        value: "b01-1-361"
+      - name: data-collection-dir
+        value: /dls/b01-1/data/2025/cm40661-6
   volumes:
     - name: session
       hostPath:
-        path: "{{`{{ workflow.parameters.visitdir }}`}}"
+        path: "{{`{{ workflow.parameters.data-collection-dir }}`}}"
         type: Directory
     - name: temp-directory
       emptyDir: {}
@@ -32,13 +29,16 @@ spec:
       container:
         image: ghcr.io/diamondlightsource/visr-reconstruction:latest
         command: [visr-reconstruction]
+        env:
+          - name: MPLCONFIGDIR
+            value: /tmp
         args:
           - "--output"
           - "/tmp/visr-reconstructed-image.png"
-          - "{{`{{workflow.parameters.input-file-path}}`}}"
+          - "{{`{{workflow.parameters.data-collection-dir}}`}}/{{`{{workflow.parameters.scan_file}}`}}.nxs"
         volumeMounts:
           - name: session
-            mountPath: "{{`{{ workflow.parameters.visitdir }}`}}"
+            mountPath: "{{`{{ workflow.parameters.data-collection-dir }}`}}"
           - name: temp-directory
             mountPath: /tmp
       outputs:
